@@ -23,4 +23,10 @@
         android:layout_height="wrap_content"
         android:hint="End Time"/>
 
+    <Button
+        android:text="Create Lobby"
+        android:onClick="createLobby"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
 </LinearLayout>

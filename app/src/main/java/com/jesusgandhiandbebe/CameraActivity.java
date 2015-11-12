@@ -1,6 +1,7 @@
 package com.jesusgandhiandbebe;
 
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Environment;
 import android.provider.MediaStore;
@@ -9,9 +10,18 @@ import android.os.Bundle;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.facebook.AccessToken;
+import com.jesusgandhiandbebe.api.RestAPI;
+import com.jesusgandhiandbebe.models.Picture;
+
 import java.io.File;
+import java.nio.ByteBuffer;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+
+import retrofit.Callback;
+import retrofit.Response;
+import retrofit.Retrofit;
 
 public class CameraActivity extends AppCompatActivity {
 
@@ -79,6 +89,38 @@ public class CameraActivity extends AppCompatActivity {
                 // Image captured and saved to fileUri specified in the Intent
                 Toast.makeText(this, "Image saved to:\n" +
                         data.getData(), Toast.LENGTH_LONG).show();
+                // Code to add picture to database
+                Retrofit retrofit = new Retrofit.Builder()
+                        .baseUrl(Constants.BASE_URL)
+                        .build();
+
+                RestAPI service = retrofit.create(RestAPI.class);
+
+                // Parses the picture into a byte array by:
+                // Converting to a bitmap and then using the bytes from the conversion to
+                // instantiate a new byte array
+                Bitmap b = (Bitmap) data.getExtras().get("data");
+
+                int bytes = b.getByteCount();
+
+                ByteBuffer buffer = ByteBuffer.allocate(bytes); //Create a new buffer
+                b.copyPixelsToBuffer(buffer); //Move the byte data to the buffer
+
+                byte[] array = buffer.array();
+
+                // Creates a new picture
+                Picture picture = new Picture("name", "11:;00", array);
+                service.postPicture(AccessToken.getCurrentAccessToken().getToken(), picture, new Callback<String>() {
+                    @Override
+                    public void onResponse(Response<String> response, Retrofit retrofit) {
+
+                    }
+
+                    @Override
+                    public void onFailure(Throwable t) {
+
+                    }
+                });
             } else if (resultCode == RESULT_CANCELED) {
                 // User cancelled the image capture
             } else {
