@@ -9,24 +9,41 @@
     tools:context="com.jesusgandhiandbebe.CreateLobbyActivity">
 
     <EditText
+        android:id="@+id/event_name"
+        android:layout_weight="1"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:hint="Name"/>
+        android:layout_height="0dp"
+        android:hint="Event Name"/>
 
     <EditText
+        android:id="@+id/event_time"
+        android:layout_weight="1"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="0dp"
         android:hint="Start Time"/>
 
-    <EditText
+    <TextView
+        android:text="Choose Friends You Want at Your Event"
+        android:gravity="center_vertical"
+        android:textSize="14sp"
+        android:textStyle="bold"
+        android:layout_weight="1"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:hint="End Time"/>
+        android:layout_height="0dp" />
+
+    <android.support.v7.widget.RecyclerView
+        android:layout_weight="5"
+        android:id="@+id/friend_list"
+        android:layout_height="0dp"
+        android:layout_width="match_parent">
+
+    </android.support.v7.widget.RecyclerView>
 
     <Button
+        android:layout_weight="1"
         android:text="Create Lobby"
         android:onClick="createLobby"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+        android:layout_height="0dp" />
 
 </LinearLayout>

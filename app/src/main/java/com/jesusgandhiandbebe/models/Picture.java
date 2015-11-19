@@ -1,24 +1,20 @@
 package com.jesusgandhiandbebe.models;
 
 /**
+ *
  * Created by rishant_dwivedi on 11/12/15.
  */
 public class Picture {
 
-    public String author;
-    public String timestamp;
+    public String name;
+    public String lobbyId;
     public byte[] picture;
+    public String createdAt;
 
-    /**
-     * Creates default Picture
-     * @param author
-     * @param timestamp
-     * @param picture takes in a byte array to represent the picture
-     */
-    public Picture(String author, String timestamp, byte[] picture) {
-
-        this.author = author;
-        this.timestamp = timestamp;
+    public Picture(String name, String lobbyId, byte[] picture, String createdAt) {
+        this.name = name;
+        this.lobbyId = lobbyId;
         this.picture = picture;
+        this.createdAt = createdAt;
     }
 }

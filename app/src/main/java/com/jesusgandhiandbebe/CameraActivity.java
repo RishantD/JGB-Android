@@ -1,25 +1,28 @@
 package com.jesusgandhiandbebe;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Environment;
+import android.preference.PreferenceManager;
 import android.provider.MediaStore;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
-import android.widget.Toast;
 
-import com.facebook.AccessToken;
 import com.jesusgandhiandbebe.api.RestAPI;
 import com.jesusgandhiandbebe.models.Picture;
 
 import java.io.File;
 import java.nio.ByteBuffer;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 
+import retrofit.Call;
 import retrofit.Callback;
+import retrofit.GsonConverterFactory;
 import retrofit.Response;
 import retrofit.Retrofit;
 
@@ -29,16 +32,20 @@ public class CameraActivity extends AppCompatActivity {
     public static final int MEDIA_TYPE_IMAGE = 1;
     public static final int MEDIA_TYPE_VIDEO = 2;
     private Uri fileUri;
+    private String lobbyID;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_camera);
 
+        Intent extras = getIntent();
+        lobbyID = extras.getStringExtra(Constants.LOBBY_ID_KEY);
+
         // create Intent to take a picture and return control to the calling application
         Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
 
-        fileUri = getOutputMediaFileUri(MEDIA_TYPE_IMAGE); // create a file to save the image
+        fileUri = getOutputMediaFileUri(MEDIA_TYPE_IMAGE);
         intent.putExtra(MediaStore.EXTRA_OUTPUT, fileUri); // set the image file name
 
         // start the image capture Intent
@@ -86,12 +93,11 @@ public class CameraActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == CAPTURE_IMAGE_ACTIVITY_REQUEST_CODE) {
             if (resultCode == RESULT_OK) {
-                // Image captured and saved to fileUri specified in the Intent
-                Toast.makeText(this, "Image saved to:\n" +
-                        data.getData(), Toast.LENGTH_LONG).show();
+
                 // Code to add picture to database
                 Retrofit retrofit = new Retrofit.Builder()
                         .baseUrl(Constants.BASE_URL)
+                        .addConverterFactory(GsonConverterFactory.create())
                         .build();
 
                 RestAPI service = retrofit.create(RestAPI.class);
@@ -101,26 +107,42 @@ public class CameraActivity extends AppCompatActivity {
                 // instantiate a new byte array
                 Bitmap b = (Bitmap) data.getExtras().get("data");
 
-                int bytes = b.getByteCount();
+                int bytes = 0;
+                if (b != null) {
+                    bytes = b.getByteCount();
+                }
 
                 ByteBuffer buffer = ByteBuffer.allocate(bytes); //Create a new buffer
-                b.copyPixelsToBuffer(buffer); //Move the byte data to the buffer
+                if (b != null) {
+                    b.copyPixelsToBuffer(buffer); //Move the byte data to the buffer
+                }
 
                 byte[] array = buffer.array();
 
+                SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(CameraActivity.this);
+                String fbId = prefs.getString(Constants.FB_ID_PREFS_KEY, "");
+                String name = prefs.getString(Constants.NAME_PREFS_KEY, "");
+
+                Calendar c  = Calendar.getInstance();
+                String date = c.getTime().toString();
+
                 // Creates a new picture
-                Picture picture = new Picture("name", "11:;00", array);
-                service.postPicture(AccessToken.getCurrentAccessToken().getToken(), picture, new Callback<String>() {
+                Picture picture = new Picture(name, lobbyID, array, date);
+                Call<com.jesusgandhiandbebe.models.Response> callback = service.postPicture(fbId, picture);
+                callback.enqueue(new Callback<com.jesusgandhiandbebe.models.Response>() {
                     @Override
-                    public void onResponse(Response<String> response, Retrofit retrofit) {
+                    public void onResponse(Response<com.jesusgandhiandbebe.models.Response> response, Retrofit retrofit) {
+                        Log.d("/api/Pictures/add", Integer.toString(response.code()));
 
                     }
 
                     @Override
                     public void onFailure(Throwable t) {
-
+                        Log.e("/api/Pictures/add", t.getMessage());
                     }
                 });
+
+                startActivity(new Intent(CameraActivity.this, MainActivity.class));
             } else if (resultCode == RESULT_CANCELED) {
                 // User cancelled the image capture
             } else {

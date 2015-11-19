@@ -1,20 +1,24 @@
 package com.jesusgandhiandbebe.models;
 
+import java.util.List;
+
 /**
+ *
  * Created by rishant_dwivedi on 11/12/15.
  */
 public class Lobby {
 
+    public String _id;
+    public String createdAt;
     public String name;
-    public String timestamp;
+    public String creator;
+    public List<User> users;
 
-    /**
-     * Creates a lobby
-     * @param name of lobby
-     * @param timestamp of when created
-     */
-    public Lobby (String name, String timestamp) {
+    public Lobby(String _id, String createdAt, String name, String creator, List<User>  users) {
+        this._id = _id;
+        this.createdAt = createdAt;
         this.name = name;
-        this.timestamp = timestamp;
+        this.creator = creator;
+        this.users = users;
     }
 }

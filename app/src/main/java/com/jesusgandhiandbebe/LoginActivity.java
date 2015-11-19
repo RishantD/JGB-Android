@@ -2,6 +2,8 @@ package com.jesusgandhiandbebe;
 
 import android.app.ProgressDialog;
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 
@@ -16,8 +18,12 @@ import com.facebook.GraphResponse;
 import com.facebook.login.LoginResult;
 import com.facebook.login.widget.LoginButton;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import java.util.Set;
+import java.util.TreeSet;
 
 public class LoginActivity extends AppCompatActivity {
 
@@ -69,13 +75,26 @@ public class LoginActivity extends AppCompatActivity {
                                     GraphResponse response) {
                                 // Application code
 
+                                try {
+                                    String name = object.getString("name");
+                                    String id = object.getString("id");
+
+                                    SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(LoginActivity.this);
+                                    prefs.edit().putString(Constants.NAME_PREFS_KEY, name)
+                                            .putString(Constants.FB_ID_PREFS_KEY, id)
+                                            .apply();
+
+                                } catch (JSONException e) {
+                                    e.printStackTrace();
+                                }
+
                                 startMainActivity();
 
                             }
                         });
                 // send the request with query parameter fields
                 Bundle parameters = new Bundle();
-                parameters.putString("fields", "id,name,picture,friends");
+                parameters.putString("fields", "id,name");
                 request.setParameters(parameters);
                 request.executeAsync();
             }
