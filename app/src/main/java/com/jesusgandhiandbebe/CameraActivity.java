@@ -1,5 +1,6 @@
 package com.jesusgandhiandbebe;
 
+import android.content.ContentResolver;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
@@ -10,11 +11,13 @@ import android.provider.MediaStore;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.widget.Toast;
 
 import com.jesusgandhiandbebe.api.RestAPI;
 import com.jesusgandhiandbebe.models.Picture;
 
 import java.io.File;
+import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -45,8 +48,8 @@ public class CameraActivity extends AppCompatActivity {
         // create Intent to take a picture and return control to the calling application
         Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
 
-        fileUri = getOutputMediaFileUri(MEDIA_TYPE_IMAGE);
-        intent.putExtra(MediaStore.EXTRA_OUTPUT, fileUri); // set the image file name
+//        fileUri = getOutputMediaFileUri(MEDIA_TYPE_IMAGE);
+//        intent.putExtra(MediaStore.EXTRA_OUTPUT, fileUri); // set the image file name
 
         // start the image capture Intent
         startActivityForResult(intent, CAPTURE_IMAGE_ACTIVITY_REQUEST_CODE);
@@ -93,6 +96,8 @@ public class CameraActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == CAPTURE_IMAGE_ACTIVITY_REQUEST_CODE) {
             if (resultCode == RESULT_OK) {
+                Toast.makeText(this, "Image saved to:\n" +
+                        data.getData(), Toast.LENGTH_LONG).show();
 
                 // Code to add picture to database
                 Retrofit retrofit = new Retrofit.Builder()
@@ -101,6 +106,7 @@ public class CameraActivity extends AppCompatActivity {
                         .build();
 
                 RestAPI service = retrofit.create(RestAPI.class);
+
 
                 // Parses the picture into a byte array by:
                 // Converting to a bitmap and then using the bytes from the conversion to
