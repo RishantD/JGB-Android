@@ -55,6 +55,7 @@ public class LoginActivity extends AppCompatActivity {
 
         setContentView(R.layout.activity_login);
 
+        // Call the login action with a login button
         final LoginButton loginButton = (LoginButton) findViewById(R.id.login_button);
         loginButton.setReadPermissions("user_friends", "public_profile"); // set permissions
         callbackManager = CallbackManager.Factory.create();
@@ -76,6 +77,7 @@ public class LoginActivity extends AppCompatActivity {
                                 // Application code
 
                                 try {
+                                    //Retrieve the name and ids
                                     String name = object.getString("name");
                                     String id = object.getString("id");
 

@@ -26,6 +26,12 @@ public class LobbyListAdapter extends RecyclerView.Adapter<LobbyListAdapter.View
         this.lobbies = data;
     }
 
+    /**
+     * Inflate the view by adding the attached data view
+     * @param parent
+     * @param viewType
+     * @return
+     */
     @Override
     public ViewHolder onCreateViewHolder(final ViewGroup parent, int viewType) {
         View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_lobby_list, parent, false);
@@ -40,6 +46,11 @@ public class LobbyListAdapter extends RecyclerView.Adapter<LobbyListAdapter.View
         });
     }
 
+    /**
+     * Bind the data for the lobby to the view by setting appropriate text
+     * @param holder
+     * @param position
+     */
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
         Lobby lobby = lobbies.get(position);
@@ -47,6 +58,10 @@ public class LobbyListAdapter extends RecyclerView.Adapter<LobbyListAdapter.View
         holder.lobbyIDTV.setText(lobby._id);
     }
 
+    /**
+     * Get lobby items total count
+     * @return
+     */
     @Override
     public int getItemCount() {
         return lobbies.size();

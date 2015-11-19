@@ -3,7 +3,7 @@ package com.jesusgandhiandbebe.models;
 import java.util.List;
 
 /**
- *
+ * User list class
  * Created by rishant_dwivedi on 11/19/15.
  */
 public class Users {

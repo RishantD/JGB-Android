@@ -129,6 +129,7 @@ public class CameraActivity extends AppCompatActivity {
                 String fbId = prefs.getString(Constants.FB_ID_PREFS_KEY, "");
                 String name = prefs.getString(Constants.NAME_PREFS_KEY, "");
 
+                // Create timestamp for when picture was taken
                 Calendar c  = Calendar.getInstance();
                 String date = c.getTime().toString();
 

@@ -68,6 +68,7 @@ public class MainActivity extends AppCompatActivity {
 
         final List<Lobby> data = new ArrayList<>();
 
+        //Makes an async call to the backend to get lobbies
         c.enqueue(new Callback<Lobbies>() {
             @Override
             public void onResponse(Response<Lobbies> response, Retrofit retrofit) {
@@ -76,7 +77,7 @@ public class MainActivity extends AppCompatActivity {
                 for (int i = 0; i < response.body().data.size(); i++) {
                     // Create new lobby from response
                     Lobby lobbyElement = response.body().data.get(i);
-
+                    //add lobbies to a data object to attach to an adapter
                     data.add(new Lobby(lobbyElement._id, lobbyElement.createdAt, lobbyElement.name,
                             lobbyElement.creator, lobbyElement.users));
 

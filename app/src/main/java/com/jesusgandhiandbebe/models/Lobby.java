@@ -3,7 +3,7 @@ package com.jesusgandhiandbebe.models;
 import java.util.List;
 
 /**
- *
+ * Lobby structure
  * Created by rishant_dwivedi on 11/12/15.
  */
 public class Lobby {

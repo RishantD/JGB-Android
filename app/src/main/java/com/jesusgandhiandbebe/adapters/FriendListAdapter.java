@@ -23,18 +23,33 @@ public class FriendListAdapter extends RecyclerView.Adapter<FriendListAdapter.Vi
         this.friendNames = friendNames;
     }
 
+    /**
+     * Create a new view with attached data
+     * @param parent
+     * @param viewType
+     * @return
+     */
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_friend_list, parent, false);
         return new ViewHolder(v);
     }
 
+    /**
+     * Bind name to position
+     * @param holder
+     * @param position
+     */
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
         String name = friendNames.get(position);
         holder.friendName.setText(name);
     }
 
+    /**
+     * Get Count
+     * @return
+     */
     @Override
     public int getItemCount() {
         return friendNames.size();

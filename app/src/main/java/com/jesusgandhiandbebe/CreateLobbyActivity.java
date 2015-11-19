@@ -95,6 +95,7 @@ public class CreateLobbyActivity extends AppCompatActivity {
         String fbId = prefs.getString(Constants.FB_ID_PREFS_KEY, "");
         String name = prefs.getString(Constants.NAME_PREFS_KEY, "");
 
+        // Create a list of the friends and add to the users list
         List<User> userList = new ArrayList<>();
         for (int i = 0; i < friends_fbIds.size(); i++) {
             userList.add(new User(friends_fbIds.get(i)));

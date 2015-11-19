@@ -1,7 +1,7 @@
 package com.jesusgandhiandbebe.models;
 
 /**
- *
+ * Picture Schema for json object
  * Created by rishant_dwivedi on 11/12/15.
  */
 public class Picture {
