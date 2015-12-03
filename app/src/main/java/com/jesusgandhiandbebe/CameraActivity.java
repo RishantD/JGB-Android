@@ -10,12 +10,14 @@ import android.preference.PreferenceManager;
 import android.provider.MediaStore;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Base64;
 import android.util.Log;
 import android.widget.Toast;
 
 import com.jesusgandhiandbebe.api.RestAPI;
 import com.jesusgandhiandbebe.models.Picture;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -80,6 +82,14 @@ public class CameraActivity extends AppCompatActivity {
 
                 byte[] array = buffer.array();
 
+                ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                if (b != null) {
+                    b.compress(Bitmap.CompressFormat.PNG, 100, baos);
+                }
+
+                //byte[] encoded = Base64.encode(baos.toByteArray(), Base64.DEFAULT);
+                byte[] encoded = baos.toByteArray();
+
                 SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(CameraActivity.this);
                 String fbId = prefs.getString(Constants.FB_ID_PREFS_KEY, "");
                 String name = prefs.getString(Constants.NAME_PREFS_KEY, "");
@@ -89,7 +99,7 @@ public class CameraActivity extends AppCompatActivity {
                 String date = c.getTime().toString();
 
                 // Creates a new picture
-                Picture picture = new Picture(name, lobbyID, array, date);
+                Picture picture = new Picture(name, lobbyID, encoded, date);
                 Call<com.jesusgandhiandbebe.models.Response> callback = service.postPicture(fbId, picture);
                 callback.enqueue(new Callback<com.jesusgandhiandbebe.models.Response>() {
                     @Override

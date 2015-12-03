@@ -68,6 +68,7 @@
         </android.support.v7.widget.RecyclerView>
 
         <Button
+            android:id="@+id/create_event"
             android:layout_weight="1"
             android:text="Create Lobby"
             android:onClick="createLobby"
