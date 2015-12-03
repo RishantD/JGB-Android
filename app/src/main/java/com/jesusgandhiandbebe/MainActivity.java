@@ -1,14 +1,19 @@
 package com.jesusgandhiandbebe;
 
+import android.app.ActivityOptions;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.design.widget.FloatingActionButton;
+import android.support.design.widget.Snackbar;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.support.v7.widget.helper.ItemTouchHelper;
+import android.transition.Explode;
 import android.util.Log;
 import android.view.View;
 import android.view.Menu;
@@ -31,6 +36,8 @@ import retrofit.Retrofit;
 
 public class MainActivity extends AppCompatActivity {
 
+    final List<Lobby> data = new ArrayList<>();
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -44,7 +51,9 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
 
-                startActivity(new Intent(MainActivity.this, CreateLobbyActivity.class));
+                getWindow().setExitTransition(new Explode());
+                startActivity(new Intent(MainActivity.this, CreateLobbyActivity.class),
+                        ActivityOptions.makeSceneTransitionAnimation(MainActivity.this).toBundle());
             }
         });
 
@@ -53,9 +62,55 @@ public class MainActivity extends AppCompatActivity {
         manager.setOrientation(LinearLayoutManager.VERTICAL);
         recyclerView.setLayoutManager(manager);
 
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
-        String fbId = prefs.getString(Constants.FB_ID_PREFS_KEY, "");
+        Intent intent = getIntent();
+        boolean success = intent.getBooleanExtra("CameraSuccess", false);
+        if (success) {
+            Snackbar.make(recyclerView, "Picture Sent!", Snackbar.LENGTH_LONG)
+                    .setAction("Action", null).show();
 
+        }
+
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+        final String fbId = prefs.getString(Constants.FB_ID_PREFS_KEY, "");
+
+        loadData(null, recyclerView, fbId);
+
+        final SwipeRefreshLayout mSwipeRefreshLayout = (SwipeRefreshLayout) findViewById(R.id.activity_main_swipe_refresh_layout);
+        mSwipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                data.clear();
+                synchronized (recyclerView) {
+                    recyclerView.notify();
+                }
+                loadData(mSwipeRefreshLayout, recyclerView, fbId);
+            }
+        });
+
+        ItemTouchHelper.SimpleCallback simpleItemTouchCallback = new ItemTouchHelper
+                .SimpleCallback(0, ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT) {
+
+            @Override
+            public boolean onMove(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder, RecyclerView.ViewHolder target) {
+                return false;
+            }
+
+            @Override
+            public void onSwiped(RecyclerView.ViewHolder viewHolder, int swipeDir) {
+                //Remove swiped item from list and notify the RecyclerView
+                int pos = viewHolder.getAdapterPosition();
+                data.remove(pos);
+                synchronized (recyclerView){
+                    recyclerView.notify();
+                }
+            }
+        };
+
+        ItemTouchHelper itemTouchHelper = new ItemTouchHelper(simpleItemTouchCallback);
+        itemTouchHelper.attachToRecyclerView(recyclerView);
+    }
+
+    private void loadData(final SwipeRefreshLayout mSwipeRefreshLayout, final RecyclerView recyclerView, String fbId) {
         // Create call to backend to receive all lobbies that the individual is a part of
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl(Constants.BASE_URL)
@@ -65,8 +120,6 @@ public class MainActivity extends AppCompatActivity {
         RestAPI service = retrofit.create(RestAPI.class);
 
         Call<Lobbies> c = service.getLobbies(fbId);
-
-        final List<Lobby> data = new ArrayList<>();
 
         //Makes an async call to the backend to get lobbies
         c.enqueue(new Callback<Lobbies>() {
@@ -82,6 +135,9 @@ public class MainActivity extends AppCompatActivity {
                             lobbyElement.creator, lobbyElement.users));
 
 
+                    if (mSwipeRefreshLayout != null)
+                        mSwipeRefreshLayout.setRefreshing(false);
+
                 }
 
                 LobbyListAdapter adapter = new LobbyListAdapter(data);
@@ -94,10 +150,11 @@ public class MainActivity extends AppCompatActivity {
                     Log.e("/api/Lobbies/get", t.getMessage());
                 else
                     Log.e("/api/Lobbies/get", "Oops");
+
+                if (mSwipeRefreshLayout != null)
+                    mSwipeRefreshLayout.setRefreshing(false);
             }
         });
-
-
     }
 
     @Override

@@ -13,7 +13,6 @@ import java.util.List;
 
 /**
  *
- * Created by rishant_dwivedi on 11/18/15.
  */
 public class FriendListAdapter extends RecyclerView.Adapter<FriendListAdapter.ViewHolder>{
 

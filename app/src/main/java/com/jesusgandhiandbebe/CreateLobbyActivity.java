@@ -1,15 +1,25 @@
 package com.jesusgandhiandbebe;
 
+import android.app.DatePickerDialog;
+import android.app.Dialog;
+import android.app.TimePickerDialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
+import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.transition.Explode;
+import android.transition.Fade;
 import android.util.Log;
 import android.view.View;
+import android.view.Window;
+import android.widget.DatePicker;
 import android.widget.EditText;
+import android.widget.TextView;
+import android.widget.TimePicker;
 
 import com.facebook.AccessToken;
 import com.facebook.GraphRequest;
@@ -24,7 +34,10 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.text.DateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 
 import retrofit.Call;
@@ -37,9 +50,14 @@ public class CreateLobbyActivity extends AppCompatActivity {
 
     private List<String> friends_fbIds = new ArrayList<>();
     private List<String> friends_Names = new ArrayList<>();
+    private static Date start;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        getWindow().requestFeature(Window.FEATURE_CONTENT_TRANSITIONS);
+        getWindow().setEnterTransition(new Explode());
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_create_lobby);
 
@@ -76,12 +94,32 @@ public class CreateLobbyActivity extends AppCompatActivity {
         request.setParameters(parameters);
         request.executeAsync();
 
+        final TextView timePicker = (TextView) findViewById(R.id.event_time);
+        final TextView datePicker = (TextView) findViewById(R.id.event_day);
+
+        timePicker.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                showTimePicker(v);
+            }
+        });
+
+        datePicker.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                showDatePicker(v);
+            }
+        });
+
+        final Calendar calendar = Calendar.getInstance();
+        calendar.set(Calendar.SECOND, 0);
+
+        start = calendar.getTime();
     }
 
     public void createLobby(View view) {
 
         EditText eventNameTV = (EditText) findViewById(R.id.event_name);
-        EditText eventTimeTV = (EditText) findViewById(R.id.event_time);
 
         // Creates a call to the backend to create a new lobby with the specified criteria of name and time
         Retrofit retrofit = new Retrofit.Builder()
@@ -103,7 +141,7 @@ public class CreateLobbyActivity extends AppCompatActivity {
         Users users = new Users(userList);
 
         // Create new lobby
-        Lobby lobby = new Lobby(null, eventTimeTV.getText().toString(), eventNameTV.getText().toString(), name, userList);
+        Lobby lobby = new Lobby(null, start.toString(), eventNameTV.getText().toString(), name, userList);
         Call<com.jesusgandhiandbebe.models.Response> c = service.postLobby(fbId, lobby);
         c.enqueue(new Callback<com.jesusgandhiandbebe.models.Response>() {
             @Override
@@ -118,5 +156,78 @@ public class CreateLobbyActivity extends AppCompatActivity {
                 Log.e("/api/Lobbies/create", t.getMessage());
             }
         });
+    }
+
+    public void showTimePicker(View view) {
+        DialogFragment fragment = new TimePickerFragment();
+        fragment.show(getSupportFragmentManager(), "timePicker");
+    }
+
+    public void showDatePicker(View view) {
+        DialogFragment fragment = new DatePickerFragment();
+        fragment.show(getSupportFragmentManager(), "datePicker");
+    }
+
+    public static class TimePickerFragment extends DialogFragment implements TimePickerDialog.OnTimeSetListener {
+
+        @Override
+        public void onCreate(Bundle savedInstanceState) {
+            super.onCreate(savedInstanceState);
+            //setStyle(STYLE_NORMAL, R.style.DialogFragmentTheme);
+        }
+
+        @Override
+        public Dialog onCreateDialog(Bundle savedInstanceState) {
+            final Calendar calendar = Calendar.getInstance();
+            int hour = calendar.get(Calendar.HOUR_OF_DAY);
+            int minute = calendar.get(Calendar.MINUTE);
+
+            return new TimePickerDialog(getActivity(), this, hour, minute, false);
+        }
+
+        @Override
+        public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
+            final Calendar calendar = Calendar.getInstance();
+            calendar.set(Calendar.HOUR_OF_DAY, hourOfDay);
+            calendar.set(Calendar.MINUTE, minute);
+            calendar.set(Calendar.SECOND, 0);
+
+            DateFormat time = DateFormat.getTimeInstance();
+            final TextView button = (TextView) getActivity().findViewById(R.id.event_time);
+            start = calendar.getTime();
+            button.setText(time.format(start));
+        }
+    }
+
+    public static class DatePickerFragment extends DialogFragment implements DatePickerDialog.OnDateSetListener {
+
+        @Override
+        public void onCreate(Bundle savedInstanceState) {
+            super.onCreate(savedInstanceState);
+            //setStyle(STYLE_NORMAL, R.style.DialogFragmentTheme);
+        }
+
+        @Override
+        public Dialog onCreateDialog(Bundle savedInstanceState) {
+            final Calendar calendar = Calendar.getInstance();
+            int year = calendar.get(Calendar.YEAR);
+            int month = calendar.get(Calendar.MONTH);
+            int day = calendar.get(Calendar.DAY_OF_MONTH);
+
+            return new DatePickerDialog(getActivity(), this, year, month, day);
+        }
+
+        @Override
+        public void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
+            final Calendar calendar = Calendar.getInstance();
+            calendar.set(Calendar.YEAR, year);
+            calendar.set(Calendar.MONTH, monthOfYear);
+            calendar.set(Calendar.DAY_OF_MONTH, dayOfMonth);
+
+            DateFormat date = DateFormat.getDateInstance();
+            final TextView button = (TextView) getActivity().findViewById(R.id.event_day);
+            start = calendar.getTime();
+            button.setText(date.format(start));
+        }
     }
 }
